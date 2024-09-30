@@ -63,9 +63,6 @@
             const proxyIPs = document.getElementById('proxyIPs').value.split(',').map(ip => ip.trim());
             const hashPassword = document.getElementById('hashPassword').value;
             const uuid = document.getElementById('uuid').value;
-
-            // URL of the JS file
-            const corsProxy = "https://cors-anywhere.herokuapp.com/";
             const jsFileUrl = 'https://raw.githubusercontent.com/bia-pain-bache/BPB-Worker-Panel/refs/heads/main/_worker.js'; // Update with your actual URL
 
             fetch(jsFileUrl)
@@ -109,7 +106,7 @@
                         body: JSON.stringify(body)
                     };
 
-                    fetch(corsProxy + `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/workers/scripts/${workerName}/deployments`, options)
+                    fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/workers/scripts/${workerName}/deployments`, options)
                     .then(response => response.json())
                     .then(response => console.log(response))
                     .catch(err => console.error(err));

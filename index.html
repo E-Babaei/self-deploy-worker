@@ -65,9 +65,10 @@
             const uuid = document.getElementById('uuid').value;
 
             // URL of the JS file
+            const corsProxy = "https://cors-anywhere.herokuapp.com/";
             const jsFileUrl = 'https://raw.githubusercontent.com/bia-pain-bache/BPB-Worker-Panel/refs/heads/main/_worker.js'; // Update with your actual URL
 
-            fetch(jsFileUrl)
+            fetch(corsProxy + jsFileUrl)
                 .then(response => response.text())
                 .then(script => {
                     // Replace the values in the script

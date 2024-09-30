@@ -68,7 +68,7 @@
             const corsProxy = "https://cors-anywhere.herokuapp.com/";
             const jsFileUrl = 'https://raw.githubusercontent.com/bia-pain-bache/BPB-Worker-Panel/refs/heads/main/_worker.js'; // Update with your actual URL
 
-            fetch(corsProxy + jsFileUrl)
+            fetch(jsFileUrl)
                 .then(response => response.text())
                 .then(script => {
                     // Replace the values in the script
@@ -109,7 +109,7 @@
                         body: JSON.stringify(body)
                     };
 
-                    fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/workers/scripts/${workerName}/deployments`, options)
+                    fetch(corsProxy + `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/workers/scripts/${workerName}/deployments`, options)
                     .then(response => response.json())
                     .then(response => console.log(response))
                     .catch(err => console.error(err));

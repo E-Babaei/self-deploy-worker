@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy Configuration Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        input, textarea, button {
+            margin-top: 10px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Configure Your Proxy</h2>
+    <form id="proxy-form">
+
+        <label for="workerName">Worker Name:</label>
+        <input type="text" id="workerName" name="workerName" required><br><br>
+        
+        <label for="cfEmail">Cloudflare Email:</label>
+        <input type="text" id="cfEmail" name="cfEmail" required><br><br>
+
+        <label for="cfAccountId">Cloudflare Account ID:</label>
+        <input type="text" id="cfAccountId" name="cfAccountId" required><br><br>
+
+        <label for="cfApiToken">Cloudflare API Token:</label>
+        <input type="text" id="cfApiToken" name="cfApiToken" required><br><br>
+
+        <label for="trojanPassword">Trojan Password:</label>
+        <input type="text" id="trojanPassword" name="trojanPassword" required><br><br>
+
+        <label for="proxyIPs">Proxy IPs (comma separated):</label>
+        <input type="text" id="proxyIPs" name="proxyIPs" required><br><br>
+
+        <label for="hashPassword">Hash Password:</label>
+        <input type="text" id="hashPassword" name="hashPassword" required><br><br>
+
+        <label for="uuid">UUID:</label>
+        <input type="text" id="uuid" name="uuid" required><br><br>
+
+        <button type="submit">Generate Script</button>
+    </form>
+
+    <br>
+    <textarea id="output" rows="10" cols="50" readonly></textarea>
+    <br><br>
+    <a id="downloadLink" href="#" download="config.js" style="display:none;">Download Config</a>
+
+    <script>
+        document.getElementById('proxy-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const workerName = document.getElementById('workerName').value;
+            const cfEmail = document.getElementById('cfEmail').value;
+            const cfAccountId = document.getElementById('cfAccountId').value;
+            const cfApiToken = document.getElementById('cfApiToken').value;
+            const trojanPassword = document.getElementById('trojanPassword').value;
+            const proxyIPs = document.getElementById('proxyIPs').value.split(',').map(ip => ip.trim());
+            const hashPassword = document.getElementById('hashPassword').value;
+            const uuid = document.getElementById('uuid').value;
+
+            // URL of the JS file
+            const jsFileUrl = 'https://raw.githubusercontent.com/bia-pain-bache/BPB-Worker-Panel/refs/heads/main/_worker.js'; // Update with your actual URL
+
+            fetch(jsFileUrl)
+                .then(response => response.text())
+                .then(script => {
+                    // Replace the values in the script
+                    let modifiedScript = script
+                        .replace(/let userID = '.*';/, `let userID = '${uuid}';`)
+                        .replace(/const proxyIPs= \[.*\];/, `const proxyIPs= ${JSON.stringify(proxyIPs)};`)
+                        .replace(/let trojanPassword = `.*`;/, `let trojanPassword = \`${trojanPassword}\`;`)
+                        .replace(/let hashPassword = '.*';/, `let hashPassword = '${hashPassword}';`);
+
+                    // Display the modified script in the textarea
+                    document.getElementById('output').value = modifiedScript;
+
+                    // Create a downloadable link for the modified script
+                    const blob = new Blob([modifiedScript], { type: 'application/javascript' });
+                    const url = URL.createObjectURL(blob);
+                    const downloadLink = document.getElementById('downloadLink');
+                    downloadLink.href = url;
+                    downloadLink.style.display = 'block';
+
+                    const body = {
+                        annotations: { "workers/message": "Deploy worker." },
+                        strategy: "percentage",
+                        versions: [
+                            { 
+                                percentage: 100, 
+                                version_id: crypto.randomUUID()
+                            }
+                        ]
+                    }
+
+                    const options = {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Auth-Email": cfEmail,
+                            "X-Auth-Key": cfApiToken,
+                        },
+                        body: JSON.stringify(body)
+                    };
+
+                    fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/workers/scripts/${workerName}/deployments`, options)
+                    .then(response => response.json())
+                    .then(response => console.log(response))
+                    .catch(err => console.error(err));
+                })
+                .catch(error => {
+                    console.error('Error fetching or modifying the JS file:', error);
+                });
+        });
+    </script>
+</body>
+</html>

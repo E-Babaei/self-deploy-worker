@@ -107,8 +107,8 @@
                         body: JSON.stringify(body)
                     };
 
-                    const corsProxy = "https://cors-header-proxy.bpb-dev.workers.dev/";
-                    fetch(corsProxy + `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/workers/scripts/${workerName}/deployments`, options)
+
+                    fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/workers/scripts/${workerName}/deployments`, options)
                     .then(response => response.json())
                     .then(response => console.log(response))
                     .catch(err => console.error(err));
